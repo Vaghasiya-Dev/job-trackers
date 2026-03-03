@@ -39,10 +39,10 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full border-border/70 bg-card/85 shadow-sm backdrop-blur">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
-          <Clock className="w-5 h-5" />
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+          <Clock className="h-5 w-5" />
           Upcoming Events
         </CardTitle>
       </CardHeader>
@@ -52,38 +52,34 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
             {events.map((event, index) => {
               const Icon = eventIcons[event.type];
               const iconColor = eventColors[event.type];
-              
+
               return (
                 <motion.div
                   key={event.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="p-3 rounded-xl border bg-card hover:shadow-md transition-shadow"
+                  className="rounded-xl border border-border/60 bg-card/90 p-3 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${iconColor}`}>
-                      <Icon className="w-4 h-4" />
+                    <div className={`rounded-lg p-2 ${iconColor}`}>
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium truncate">
-                          {event.jobTitle}
-                        </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-medium">{event.jobTitle}</p>
                         <Badge variant="outline" className="text-xs">
                           {eventLabels[event.type]}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {event.companyName}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                        <Calendar className="w-3 h-3" />
+                      <p className="truncate text-xs text-muted-foreground">{event.companyName}</p>
+                      <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
                         <span>{formatEventDate(event.date)}</span>
                         {event.time && (
                           <>
-                            <span>•</span>
-                            <Clock className="w-3 h-3" />
+                            <span>&bull;</span>
+                            <Clock className="h-3 w-3" />
                             <span>{event.time}</span>
                           </>
                         )}
@@ -94,9 +90,7 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
               );
             })}
             {events.length === 0 && (
-              <div className="text-center py-8 text-muted-foreground text-sm">
-                No upcoming events
-              </div>
+              <div className="py-8 text-center text-sm text-muted-foreground">No upcoming events</div>
             )}
           </div>
         </ScrollArea>

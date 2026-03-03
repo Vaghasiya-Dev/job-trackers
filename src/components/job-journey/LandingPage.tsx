@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { 
   Rocket, 
   Target, 
@@ -87,6 +88,9 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <Button asChild variant="outline">
+              <Link href="/login">Login</Link>
+            </Button>
             <Button onClick={onGetStarted}>
               Get Started
               <ArrowRight className="ml-2 w-4 h-4" />

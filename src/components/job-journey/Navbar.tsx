@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, 
@@ -22,6 +23,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useJobStore } from '@/store/job-store';
+import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/store/auth-store';
 
 interface NavbarProps {
   onNavigate: (view: 'landing' | 'dashboard' | 'jobs' | 'analytics') => void;
@@ -30,12 +33,46 @@ interface NavbarProps {
 export function Navbar({ onNavigate }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const currentView = useJobStore((state) => state.currentView);
+  const router = useRouter();
+  const { toast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const clearUser = useAuthStore((state) => state.clearUser);
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'jobs', label: 'Job Board', icon: Briefcase },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
   ] as const;
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        clearUser();
+        toast({
+          title: "Success",
+          description: "Logged out successfully",
+        });
+        router.push('/login');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const initials = (user?.name || user?.email || 'U')
+    .split(' ')
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('')
+    .slice(0, 2);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -79,7 +116,7 @@ export function Navbar({ onNavigate }: NavbarProps) {
                   <Avatar className="h-10 w-10 border-2 border-primary/20">
                     <AvatarImage src="" />
                     <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">
-                      AJ
+                      {initials}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
@@ -87,14 +124,14 @@ export function Navbar({ onNavigate }: NavbarProps) {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">Alex Johnson</p>
-                    <p className="text-xs text-muted-foreground">alex@example.com</p>
+                    <p className="text-sm font-medium">{user?.name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{user?.email || 'user@example.com'}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onNavigate('landing')}>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Back to Landing</span>
+                  <span>Logout</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -144,12 +181,12 @@ export function Navbar({ onNavigate }: NavbarProps) {
                 variant="ghost"
                 className="justify-start gap-2 text-muted-foreground"
                 onClick={() => {
-                  onNavigate('landing');
                   setIsMobileMenuOpen(false);
+                  handleLogout();
                 }}
               >
                 <LogOut className="w-4 h-4" />
-                Back to Landing
+                Logout
               </Button>
             </nav>
           </motion.div>

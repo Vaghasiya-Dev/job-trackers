@@ -27,7 +27,7 @@ export function StatCard({ title, value, icon: Icon, trend, color = 'primary' }:
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="hover:shadow-lg transition-shadow duration-300">
+      <Card className="group border-border/70 bg-card/85 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -37,7 +37,7 @@ export function StatCard({ title, value, icon: Icon, trend, color = 'primary' }:
                 <p className="text-xs text-success mt-1">{trend}</p>
               )}
             </div>
-            <div className={`p-3 rounded-xl ${colorVariants[color]}`}>
+            <div className={`rounded-xl p-3 transition-transform duration-300 group-hover:scale-110 ${colorVariants[color]}`}>
               <Icon className="w-6 h-6" />
             </div>
           </div>

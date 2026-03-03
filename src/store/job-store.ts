@@ -48,18 +48,17 @@ interface JobStore {
   viewMode: 'kanban' | 'list';
   editingJob: Job | null;
   isModalOpen: boolean;
-  
-  // Actions
+
   setCurrentView: (view: 'landing' | 'dashboard' | 'jobs' | 'analytics') => void;
   setViewMode: (mode: 'kanban' | 'list') => void;
   openModal: (job?: Job) => void;
   closeModal: () => void;
-  
+
   addJob: (job: Omit<Job, 'id' | 'dateCreated' | 'dateUpdated'>) => void;
   updateJob: (id: string, updates: Partial<Job>) => void;
   deleteJob: (id: string) => void;
   updateJobStatus: (id: string, status: JobStatus) => void;
-  
+
   getJobsByStatus: (status: JobStatus) => Job[];
   getStats: () => {
     total: number;
@@ -73,10 +72,11 @@ interface JobStore {
   };
 }
 
-// Generate unique IDs
-const generateId = () => Math.random().toString(36).substring(2, 11);
+export type PersistedJobSlice = Pick<JobStore, 'jobs' | 'activities' | 'upcomingEvents'>;
 
-// Mock data with 10 sample jobs
+const generateId = () => Math.random().toString(36).substring(2, 11);
+const STORAGE_BASE_KEY = 'job-journey-storage';
+
 const mockJobs: Job[] = [
   {
     id: generateId(),
@@ -223,7 +223,6 @@ const mockJobs: Job[] = [
   },
 ];
 
-// Mock activities
 const mockActivities: Activity[] = [
   {
     id: generateId(),
@@ -258,7 +257,7 @@ const mockActivities: Activity[] = [
     jobId: mockJobs[3].id,
     jobTitle: mockJobs[3].jobTitle,
     companyName: mockJobs[3].companyName,
-    description: 'Received an Offer! 🎉',
+    description: 'Received an Offer!',
     timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
   },
   {
@@ -272,7 +271,6 @@ const mockActivities: Activity[] = [
   },
 ];
 
-// Mock upcoming events
 const mockUpcomingEvents: UpcomingEvent[] = [
   {
     id: generateId(),
@@ -311,6 +309,69 @@ const mockUpcomingEvents: UpcomingEvent[] = [
   },
 ];
 
+const createInitialData = (): PersistedJobSlice => ({
+  jobs: mockJobs,
+  activities: mockActivities,
+  upcomingEvents: mockUpcomingEvents,
+});
+
+function getPersistedSliceFromRaw(raw: string | null): PersistedJobSlice | null {
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as {
+      state?: PersistedJobSlice;
+    };
+
+    if (!parsed?.state) return null;
+
+    return {
+      jobs: parsed.state.jobs ?? [],
+      activities: parsed.state.activities ?? [],
+      upcomingEvents: parsed.state.upcomingEvents ?? [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function serializePersistedSlice(slice: PersistedJobSlice): string {
+  return JSON.stringify({
+    state: slice,
+    version: 0,
+  });
+}
+
+let activeStorageKey = STORAGE_BASE_KEY;
+let activeUserId: string | null = null;
+let syncTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleServerSync() {
+  if (typeof window === 'undefined' || !activeUserId) return;
+
+  if (syncTimer) clearTimeout(syncTimer);
+
+  syncTimer = setTimeout(async () => {
+    const state = useJobStore.getState();
+    const payload: PersistedJobSlice = {
+      jobs: state.jobs,
+      activities: state.activities,
+      upcomingEvents: state.upcomingEvents,
+    };
+
+    try {
+      await fetch('/api/jobs/snapshot', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ state: payload }),
+      });
+    } catch {
+      // Keep local state as fallback if network sync fails.
+    }
+  }, 400);
+}
+
 export const useJobStore = create<JobStore>()(
   persist(
     (set, get) => ({
@@ -324,7 +385,7 @@ export const useJobStore = create<JobStore>()(
 
       setCurrentView: (view) => set({ currentView: view }),
       setViewMode: (mode) => set({ viewMode: mode }),
-      
+
       openModal: (job) => set({ isModalOpen: true, editingJob: job || null }),
       closeModal: () => set({ isModalOpen: false, editingJob: null }),
 
@@ -335,7 +396,7 @@ export const useJobStore = create<JobStore>()(
           dateCreated: new Date().toISOString(),
           dateUpdated: new Date().toISOString(),
         };
-        
+
         const newActivity: Activity = {
           id: generateId(),
           type: 'created',
@@ -345,11 +406,12 @@ export const useJobStore = create<JobStore>()(
           description: `Added to ${newJob.status.replace('-', ' ')}`,
           timestamp: new Date().toISOString(),
         };
-        
+
         set((state) => ({
           jobs: [newJob, ...state.jobs],
           activities: [newActivity, ...state.activities],
         }));
+        scheduleServerSync();
       },
 
       updateJob: (id, updates) => {
@@ -360,12 +422,14 @@ export const useJobStore = create<JobStore>()(
               : job
           ),
         }));
+        scheduleServerSync();
       },
 
       deleteJob: (id) => {
         set((state) => ({
           jobs: state.jobs.filter((job) => job.id !== id),
         }));
+        scheduleServerSync();
       },
 
       updateJobStatus: (id, status) => {
@@ -390,6 +454,7 @@ export const useJobStore = create<JobStore>()(
           ),
           activities: [newActivity, ...state.activities],
         }));
+        scheduleServerSync();
       },
 
       getJobsByStatus: (status) => {
@@ -411,7 +476,7 @@ export const useJobStore = create<JobStore>()(
       },
     }),
     {
-      name: 'job-journey-storage',
+      name: STORAGE_BASE_KEY,
       partialize: (state) => ({
         jobs: state.jobs,
         activities: state.activities,
@@ -420,3 +485,95 @@ export const useJobStore = create<JobStore>()(
     }
   )
 );
+
+export async function setJobStoreStorageForUser(userId: string) {
+  if (!userId) return;
+
+  const nextStorageKey = `${STORAGE_BASE_KEY}:${userId}`;
+  activeStorageKey = nextStorageKey;
+  activeUserId = userId;
+  useJobStore.persist.setOptions({ name: nextStorageKey });
+  const initialData = createInitialData();
+
+  if (typeof window === 'undefined') {
+    useJobStore.setState({
+      jobs: initialData.jobs,
+      activities: initialData.activities,
+      upcomingEvents: initialData.upcomingEvents,
+      currentView: 'dashboard',
+      viewMode: 'kanban',
+      editingJob: null,
+      isModalOpen: false,
+    });
+    return;
+  }
+
+  const legacyRaw = window.localStorage.getItem(STORAGE_BASE_KEY);
+  const userRaw = window.localStorage.getItem(nextStorageKey);
+
+  if (legacyRaw && !userRaw) {
+    window.localStorage.setItem(nextStorageKey, legacyRaw);
+  }
+
+  let serverSlice: PersistedJobSlice | null = null;
+
+  try {
+    const response = await fetch('/api/jobs/snapshot', {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (response.ok) {
+      const payload = (await response.json()) as {
+        state?: PersistedJobSlice | null;
+      };
+      serverSlice = payload?.state ?? null;
+    }
+  } catch {
+    // Fall back to local data when server read fails.
+  }
+
+  if (serverSlice) {
+    useJobStore.setState({
+      jobs: serverSlice.jobs,
+      activities: serverSlice.activities,
+      upcomingEvents: serverSlice.upcomingEvents,
+      currentView: 'dashboard',
+      viewMode: 'kanban',
+      editingJob: null,
+      isModalOpen: false,
+    });
+
+    window.localStorage.setItem(nextStorageKey, serializePersistedSlice(serverSlice));
+    return;
+  }
+
+  const effectiveRaw = window.localStorage.getItem(nextStorageKey);
+  const localSlice = getPersistedSliceFromRaw(effectiveRaw);
+  if (localSlice) {
+    useJobStore.setState({
+      jobs: localSlice.jobs,
+      activities: localSlice.activities,
+      upcomingEvents: localSlice.upcomingEvents,
+      currentView: 'dashboard',
+      viewMode: 'kanban',
+      editingJob: null,
+      isModalOpen: false,
+    });
+
+    scheduleServerSync();
+    return;
+  }
+
+  useJobStore.setState({
+    jobs: initialData.jobs,
+    activities: initialData.activities,
+    upcomingEvents: initialData.upcomingEvents,
+    currentView: 'dashboard',
+    viewMode: 'kanban',
+    editingJob: null,
+    isModalOpen: false,
+  });
+
+  scheduleServerSync();
+}

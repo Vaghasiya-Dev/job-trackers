@@ -27,7 +27,7 @@ const activityColors = {
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
   return (
-    <Card className="h-full">
+    <Card className="h-full border-border/70 bg-card/85 shadow-sm backdrop-blur">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <Briefcase className="w-5 h-5" />
@@ -47,24 +47,26 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="flex items-start gap-3"
+                  className="rounded-xl border border-border/60 bg-card/90 p-3 transition-colors hover:bg-muted/30"
                 >
-                  <div className={`p-2 rounded-lg ${iconColor}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {activity.jobTitle}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {activity.companyName}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
-                    </p>
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg ${iconColor}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {activity.jobTitle}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {activity.companyName}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {activity.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
                 </motion.div>
               );
