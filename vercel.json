@@ -1,11 +1,11 @@
 {
-  "name": "job-trackers",
+  "name": "job-tracker",
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "public": true,
   "env": {
-    "DATABASE_URL": "file:./custom.db"
+    "DATABASE_URL": "$DATABASE_URL"
   },
   "rewrites": [
     {
@@ -18,18 +18,14 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "X-Forwarded-For",
-          "value": "${IP}"
-        },
-        {
-          "key": "X-Forwarded-Proto",
-          "value": "${PROTOCOL}"
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     }
   ],
   "functions": {
-    "src/app/api/**/*.ts": {
+    "src/app/api/:path*.ts": {
       "memory": 3008,
       "maxDuration": 30
     }
