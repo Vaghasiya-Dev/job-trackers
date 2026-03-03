@@ -5,10 +5,7 @@
   "devCommand": "npm run dev",
   "public": true,
   "env": {
-    "DATABASE_URL": {
-      "description": "Database connection string",
-      "required": true
-    }
+    "DATABASE_URL": "@database_url"
   },
   "rewrites": [
     {
