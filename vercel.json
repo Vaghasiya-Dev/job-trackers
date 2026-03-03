@@ -5,7 +5,7 @@
   "devCommand": "npm run dev",
   "public": true,
   "env": {
-    "DATABASE_URL": "$DATABASE_URL"
+    "DATABASE_URL": "file:./custom.db"
   },
   "rewrites": [
     {
