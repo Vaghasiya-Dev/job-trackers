@@ -1,12 +1,9 @@
 {
-  "name": "job-tracker",
+  "name": "job-trackers",
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "public": true,
-  "env": {
-    "DATABASE_URL": "$DATABASE_URL"
-  },
   "rewrites": [
     {
       "source": "/api/:path*",
@@ -25,7 +22,7 @@
     }
   ],
   "functions": {
-    "src/app/api/:path*.ts": {
+    "api/:path*.ts": {
       "memory": 3008,
       "maxDuration": 30
     }
