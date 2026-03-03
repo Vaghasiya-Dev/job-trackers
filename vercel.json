@@ -1,0 +1,66 @@
+{
+  "name": "job-tracker",
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "public": true,
+  "env": {
+    "DATABASE_URL": "$DATABASE_URL"
+  },
+  "headers": [
+    {
+      "source": "/api/:path*",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/:path*",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "functions": {
+    "src/app/api/auth/:path*/route.ts": {
+      "memory": 3008,
+      "maxDuration": 30,
+      "includeFiles": "prisma/schema.prisma"
+    },
+    "src/app/api/jobs/:path*/route.ts": {
+      "memory": 3008,
+      "maxDuration": 30,
+      "includeFiles": "prisma/schema.prisma"
+    },
+    "src/app/api/:path*/route.ts": {
+      "memory": 2048,
+      "maxDuration": 20
+    }
+  },
+  "outputDirectory": ".next/standalone",
+  "installCommand": "npm install"
+}
