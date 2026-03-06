@@ -140,3 +140,16 @@ This scaffold includes a comprehensive set of modern web development tools:
 
 Built with ❤️ for the developer community. Supercharged by [Z.ai](https://chat.z.ai) 🚀
 "# job-trackers" 
+
+## Vercel + MongoDB Atlas checklist
+
+If deployment works locally but fails on Vercel, verify:
+
+1. `DATABASE_URL` is set in **Vercel Project Settings → Environment Variables**.
+2. Use the Atlas SRV connection string format, for example:
+   `mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<db>?retryWrites=true&w=majority`
+3. In MongoDB Atlas **Network Access**, allow Vercel access (for quick testing use `0.0.0.0/0`, then restrict later).
+4. Confirm your Atlas database user has read/write permissions to the selected database.
+5. Redeploy after updating environment variables.
+
+This project now runs `prisma generate` during build so Prisma client is always generated in Vercel builds.

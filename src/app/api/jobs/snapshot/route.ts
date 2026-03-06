@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { db } from '@/lib/db';
 
-const prisma = new PrismaClient();
 const SNAPSHOT_TITLE = '__job_snapshot__';
 
 type SnapshotPayload = {
@@ -34,7 +33,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const snapshot = await prisma.post.findFirst({
+    const snapshot = await db.post.findFirst({
       where: {
         authorId: userId,
         title: SNAPSHOT_TITLE,
@@ -73,7 +72,7 @@ export async function PUT(request: NextRequest) {
       upcomingEvents: state.upcomingEvents,
     });
 
-    const existing = await prisma.post.findFirst({
+    const existing = await db.post.findFirst({
       where: {
         authorId: userId,
         title: SNAPSHOT_TITLE,
@@ -87,7 +86,7 @@ export async function PUT(request: NextRequest) {
     });
 
     if (existing) {
-      await prisma.post.update({
+      await db.post.update({
         where: { id: existing.id },
         data: {
           content: serialized,
@@ -95,7 +94,7 @@ export async function PUT(request: NextRequest) {
         },
       });
     } else {
-      await prisma.post.create({
+      await db.post.create({
         data: {
           authorId: userId,
           title: SNAPSHOT_TITLE,
