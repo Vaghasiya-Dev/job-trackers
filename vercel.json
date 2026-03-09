@@ -47,17 +47,17 @@
   ],
   "functions": {
     "src/app/api/auth/:path*/route.ts": {
-      "memory": 3008,
+      "memory": 1024,
       "maxDuration": 30,
       "includeFiles": "prisma/schema.prisma"
     },
     "src/app/api/jobs/:path*/route.ts": {
-      "memory": 3008,
+      "memory": 1024,
       "maxDuration": 30,
       "includeFiles": "prisma/schema.prisma"
     },
     "src/app/api/:path*/route.ts": {
-      "memory": 2048,
+      "memory": 1024,
       "maxDuration": 20
     }
   },
