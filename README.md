@@ -1,142 +1,161 @@
-# 🚀 Welcome to Z.ai Code Scaffold
+# Job Tracker (Job Journey)
 
-A modern, production-ready web application scaffold powered by cutting-edge technologies, designed to accelerate your development with [Z.ai](https://chat.z.ai)'s AI-powered coding assistance.
+Job Tracker is a Next.js application for managing your job search pipeline from one place.
+It combines authentication, a board/table workflow, analytics, and persistent snapshots so users can track progress across sessions.
 
-## ✨ Technology Stack
+## Features
 
-This scaffold provides a robust foundation built with:
+- User signup, login, logout, and session validation
+- Dashboard view with key job-search insights
+- Job board and table-based tracking workflow
+- Analytics views for job search trends
+- Snapshot persistence tied to authenticated users
+- Responsive UI with reusable component architecture
 
-### 🎯 Core Framework
-- **⚡ Next.js 16** - The React framework for production with App Router
-- **📘 TypeScript 5** - Type-safe JavaScript for better developer experience
-- **🎨 Tailwind CSS 4** - Utility-first CSS framework for rapid UI development
+## Tech Stack
 
-### 🧩 UI Components & Styling
-- **🧩 shadcn/ui** - High-quality, accessible components built on Radix UI
-- **🎯 Lucide React** - Beautiful & consistent icon library
-- **🌈 Framer Motion** - Production-ready motion library for React
-- **🎨 Next Themes** - Perfect dark mode in 2 lines of code
+- Next.js 16 (App Router)
+- React 19 + TypeScript
+- Tailwind CSS + shadcn/ui
+- Zustand for client state management
+- Prisma ORM with MongoDB
+- bcryptjs for password hashing
 
-### 📋 Forms & Validation
-- **🎣 React Hook Form** - Performant forms with easy validation
-- **✅ Zod** - TypeScript-first schema validation
+## Project Structure
 
-### 🔄 State Management & Data Fetching
-- **🐻 Zustand** - Simple, scalable state management
-- **🔄 TanStack Query** - Powerful data synchronization for React
-- **🌐 Fetch** - Promise-based HTTP request
+```text
+src/
+	app/
+		api/                 # Route handlers (auth, health, snapshots)
+		dashboard/           # Protected dashboard route
+		login/               # Login page
+		signup/              # Signup page
+		page.tsx             # App shell entry
+	components/
+		auth/                # Auth forms
+		job-journey/         # Domain UI (dashboard, board, analytics, etc.)
+		ui/                  # Shared UI primitives
+	hooks/                 # Reusable hooks
+	lib/
+		db.ts                # Prisma singleton client
+	store/                 # Zustand stores
 
-### 🗄️ Database & Backend
-- **🗄️ Prisma** - Next-generation TypeScript ORM
-- **🔐 NextAuth.js** - Complete open-source authentication solution
+prisma/
+	schema.prisma          # Data model and datasource
+```
 
-### 🎨 Advanced UI Features
-- **📊 TanStack Table** - Headless UI for building tables and datagrids
-- **🖱️ DND Kit** - Modern drag and drop toolkit for React
-- **📊 Recharts** - Redefined chart library built with React and D3
-- **🖼️ Sharp** - High performance image processing
+## Prerequisites
 
-### 🌍 Internationalization & Utilities
-- **🌍 Next Intl** - Internationalization library for Next.js
-- **📅 Date-fns** - Modern JavaScript date utility library
-- **🪝 ReactUse** - Collection of essential React hooks for modern development
+- Node.js 20.x
+- npm or Bun
+- MongoDB database (Atlas or self-hosted)
 
-## 🎯 Why This Scaffold?
+## Environment Variables
 
-- **🏎️ Fast Development** - Pre-configured tooling and best practices
-- **🎨 Beautiful UI** - Complete shadcn/ui component library with advanced interactions
-- **🔒 Type Safety** - Full TypeScript configuration with Zod validation
-- **📱 Responsive** - Mobile-first design principles with smooth animations
-- **🗄️ Database Ready** - Prisma ORM configured for rapid backend development
-- **🔐 Auth Included** - NextAuth.js for secure authentication flows
-- **📊 Data Visualization** - Charts, tables, and drag-and-drop functionality
-- **🌍 i18n Ready** - Multi-language support with Next Intl
-- **🚀 Production Ready** - Optimized build and deployment settings
-- **🤖 AI-Friendly** - Structured codebase perfect for AI assistance
+Create a `.env` file in the repository root:
 
-## 🚀 Quick Start
+```env
+DATABASE_URL="mongodb+srv://<user>:<password>@<cluster>/<database>?retryWrites=true&w=majority"
+```
+
+## Getting Started
+
+Install dependencies and run development server.
+
+### npm
 
 ```bash
-# Install dependencies
+npm install
+npm run dev
+```
+
+### Bun
+
+```bash
 bun install
-
-# Start development server
 bun run dev
-
-# Build for production
-bun run build
-
-# Start production server
-bun start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see your application running.
+Application runs on `http://localhost:3000`.
 
-## 🤖 Powered by Z.ai
+## Scripts
 
-This scaffold is optimized for use with [Z.ai](https://chat.z.ai) - your AI assistant for:
+- `npm run dev` - Start local development server
+- `npm run build` - Generate Prisma client and build production bundle
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run db:push` - Push Prisma schema changes to database
+- `npm run db:generate` - Generate Prisma client
+- `npm run db:migrate` - Run development migrations
+- `npm run db:reset` - Reset database through Prisma
 
-- **💻 Code Generation** - Generate components, pages, and features instantly
-- **🎨 UI Development** - Create beautiful interfaces with AI assistance  
-- **🔧 Bug Fixing** - Identify and resolve issues with intelligent suggestions
-- **📝 Documentation** - Auto-generate comprehensive documentation
-- **🚀 Optimization** - Performance improvements and best practices
+## Application Routes
 
-Ready to build something amazing? Start chatting with Z.ai at [chat.z.ai](https://chat.z.ai) and experience the future of AI-powered development!
+- `/` - Main app shell
+- `/dashboard` - Auth-protected dashboard
+- `/login` - Login page
+- `/signup` - Signup page
 
-## 📁 Project Structure
+## API Routes
 
-```
-src/
-├── app/                 # Next.js App Router pages
-├── components/          # Reusable React components
-│   └── ui/             # shadcn/ui components
-├── hooks/              # Custom React hooks
-└── lib/                # Utility functions and configurations
-```
+- `GET /api`
+  Returns a simple JSON message.
+- `POST /api/auth/signup`
+  Creates a user, hashes password, sets `userId` cookie.
+- `POST /api/auth/login`
+  Validates credentials, sets `userId` cookie.
+- `POST /api/auth/logout`
+  Clears `userId` cookie.
+- `GET /api/auth/check`
+  Validates authenticated user from cookie.
+- `GET /api/jobs/snapshot`
+  Returns saved snapshot state for current user.
+- `PUT /api/jobs/snapshot`
+  Upserts snapshot state for current user.
+- `GET /api/health/db`
+  Runs DB ping and returns health result.
 
-## 🎨 Available Features & Components
+## Data Model
 
-This scaffold includes a comprehensive set of modern web development tools:
+Defined in `prisma/schema.prisma`.
 
-### 🧩 UI Components (shadcn/ui)
-- **Layout**: Card, Separator, Aspect Ratio, Resizable Panels
-- **Forms**: Input, Textarea, Select, Checkbox, Radio Group, Switch
-- **Feedback**: Alert, Toast (Sonner), Progress, Skeleton
-- **Navigation**: Breadcrumb, Menubar, Navigation Menu, Pagination
-- **Overlay**: Dialog, Sheet, Popover, Tooltip, Hover Card
-- **Data Display**: Badge, Avatar, Calendar
+- `User`
+  Authentication identity with email, name, and hashed password.
+- `Post`
+  Stores serialized snapshot payloads. Snapshot entries are keyed by:
 
-### 📊 Advanced Data Features
-- **Tables**: Powerful data tables with sorting, filtering, pagination (TanStack Table)
-- **Charts**: Beautiful visualizations with Recharts
-- **Forms**: Type-safe forms with React Hook Form + Zod validation
+  - `authorId`: user id
+  - `title`: `__job_snapshot__`
 
-### 🎨 Interactive Features
-- **Animations**: Smooth micro-interactions with Framer Motion
-- **Drag & Drop**: Modern drag-and-drop functionality with DND Kit
-- **Theme Switching**: Built-in dark/light mode support
+## Authentication Notes
 
-### 🔐 Backend Integration
-- **Authentication**: Ready-to-use auth flows with NextAuth.js
-- **Database**: Type-safe database operations with Prisma
-- **API Client**: HTTP requests with Fetch + TanStack Query
-- **State Management**: Simple and scalable with Zustand
+- Session identity is stored in an HTTP-only `userId` cookie.
+- Cookie uses secure mode in production.
+- Session check endpoint is used to gate protected routes.
 
-### 🌍 Production Features
-- **Internationalization**: Multi-language support with Next Intl
-- **Image Optimization**: Automatic image processing with Sharp
-- **Type Safety**: End-to-end TypeScript with Zod validation
-- **Essential Hooks**: 100+ useful React hooks with ReactUse for common patterns
+## Database Notes
 
-## 🤝 Get Started with Z.ai
+- Prisma client is initialized via a singleton in `src/lib/db.ts`.
+- Query logging is enabled in development.
+- Health endpoint returns:
+  - `200` when ping succeeds
+  - `503` on connection issues
+  - `500` when `DATABASE_URL` is missing
 
-1. **Clone this scaffold** to jumpstart your project
-2. **Visit [chat.z.ai](https://chat.z.ai)** to access your AI coding assistant
-3. **Start building** with intelligent code generation and assistance
-4. **Deploy with confidence** using the production-ready setup
+## Deployment Notes
 
----
+- Build command: `npm run build`
+- Start command: `npm run start`
+- Ensure `DATABASE_URL` is configured in deployment environment.
 
-Built with ❤️ for the developer community. Supercharged by [Z.ai](https://chat.z.ai) 🚀
-"# job-trackers" 
+## Development Workflow
+
+1. Configure `.env` with MongoDB URL.
+2. Install dependencies.
+3. Run `npm run dev`.
+4. Use `npm run lint` before pushing changes.
+5. Update Prisma schema and run `npm run db:generate` when schema changes.
+
+## Status
+
+The previous scaffold-oriented README has been replaced with project-specific documentation for this repository.
