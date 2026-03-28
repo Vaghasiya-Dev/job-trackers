@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
+function isDbConnectionError(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return ["P2010", "P1001"].includes(error.code);
+  }
+
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return true;
+  }
+
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  return (
+    message.includes("server selection timeout") ||
+    message.includes("replicasetnoprimary") ||
+    message.includes("tls") ||
+    message.includes("ssl")
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user
-    const user = await prisma.user.findUnique({
+    const user = await db.user.findUnique({
       where: { email },
     });
 
@@ -54,6 +71,13 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Login error:", error);
+    if (isDbConnectionError(error)) {
+      return NextResponse.json(
+        { error: "Database connection failed. Please check MongoDB Atlas access and try again." },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }
