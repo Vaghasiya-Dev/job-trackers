@@ -99,33 +99,40 @@ Application runs on `http://localhost:3000`.
 ## API Routes
 
 - `GET /api`
-  Returns a simple JSON message.
+	Returns a simple JSON message.
+
 - `POST /api/auth/signup`
-  Creates a user, hashes password, sets `userId` cookie.
+	Creates a user, hashes password, sets `userId` cookie.
+
 - `POST /api/auth/login`
-  Validates credentials, sets `userId` cookie.
+	Validates credentials, sets `userId` cookie.
+
 - `POST /api/auth/logout`
-  Clears `userId` cookie.
+	Clears `userId` cookie.
+
 - `GET /api/auth/check`
-  Validates authenticated user from cookie.
+	Validates authenticated user from cookie.
+
 - `GET /api/jobs/snapshot`
-  Returns saved snapshot state for current user.
+	Returns saved snapshot state for current user.
+
 - `PUT /api/jobs/snapshot`
-  Upserts snapshot state for current user.
+	Upserts snapshot state for current user.
+
 - `GET /api/health/db`
-  Runs DB ping and returns health result.
+	Runs DB ping and returns health result.
 
 ## Data Model
 
 Defined in `prisma/schema.prisma`.
 
 - `User`
-  Authentication identity with email, name, and hashed password.
-- `Post`
-  Stores serialized snapshot payloads. Snapshot entries are keyed by:
+	Authentication identity with email, name, and hashed password.
 
-  - `authorId`: user id
-  - `title`: `__job_snapshot__`
+- `Post`
+	Stores serialized snapshot payloads. Snapshot entries are keyed by:
+	- `authorId`: user id
+	- `title`: `__job_snapshot__`
 
 ## Authentication Notes
 
@@ -138,9 +145,9 @@ Defined in `prisma/schema.prisma`.
 - Prisma client is initialized via a singleton in `src/lib/db.ts`.
 - Query logging is enabled in development.
 - Health endpoint returns:
-  - `200` when ping succeeds
-  - `503` on connection issues
-  - `500` when `DATABASE_URL` is missing
+	- `200` when ping succeeds
+	- `503` on connection issues
+	- `500` when `DATABASE_URL` is missing
 
 ## Deployment Notes
 
